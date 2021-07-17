@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <main class="text-center">
-      <div class="logo my-5">
+      <div class="logo my-5" @click="clear_all">
         <img src="../assets/pokedex-logo.svg" alt="Pokédex" />
       </div>
       <div class="search">
@@ -9,49 +9,88 @@
           type="text"
           placeholder="Digite o nome ou ID de um pokémon"
           class="my-4"
+          v-model="pokemon_name"
+          @keyup.enter="search"
         />
-        <b-button variant="warning" size="lg">Buscar</b-button>
+        <b-button variant="warning" @click="search" size="lg">Buscar</b-button>
       </div>
     </main>
     <div class="result">
-      <h2 class="text-center">RESULTADO</h2>
-      <div class="card d-flex flex-row p-5 justify-content-around">
-        <div class="name">
-          <div class="info">
-            <h2>SQUIRTLE Nº007</h2>
-            <p class="px-3 py-1 mt-3 mb-5">WATER</p>
-          </div>
-          <div class="measures d-flex align-center">
-            <p class="mr-5">
-              <img class="icon" src="../assets/balance.svg" alt="Weigth" />
-              9.0 Kg
-            </p>
-            <p>
-              <img class="icon" src="../assets/ruler.svg" alt="Height" />
-              0.5 m
-            </p>
-          </div>
+      <div
+        v-show="loading"
+        class="loading justify-content-center align-items-center"
+      >
+        <b-spinner label="Spinning" variant="white" size="lg"></b-spinner>
+      </div>
+      <div
+        v-show="error && !loading"
+        class="error_message justify-content-center align-items-center"
+      >
+        <h2>
+          Pokémon <span>{{ pokemon_error_name }}</span> não encontrado
+        </h2>
+      </div>
+      <div v-if="pokemon.id && !loading">
+        <div class="divider d-flex justify-content-center align-items-center ">
+          <h2 class="text-center mx-4">RESULTADO</h2>
         </div>
-        <div class="attributes">
-          <p>
-            <img class="icon" src="../assets/heart.svg" alt="HP" />
-            44 HP
-          </p>
-          <p>
-            <img class="icon" src="../assets/sword.svg" alt="Attack" />
-            48 ATK
-          </p>
-          <p>
-            <img class="icon" src="../assets/shield.svg" alt="Defense" />
-            65 DEF
-          </p>
-          <p>
-            <img class="icon" src="../assets/speed.svg" alt="Speed" />
-            43 SPD
-          </p>
-        </div>
-        <div class="image">
-          <img src="../assets/squirtle.png" alt="Squirtle" />
+        <div
+          :style="color_accent"
+          class="card d-flex flex-row p-5 justify-content-between"
+        >
+          <div class="name d-flex flex-column justify-content-between">
+            <div class="info">
+              <h2>
+                {{ pokemon.name }} Nº
+                {{ pokemon.id.toString().padStart(3, "0") }}
+              </h2>
+              <span class="px-3 py-1 mt-3">{{ pokemon.type }}</span>
+            </div>
+            <div class="measures d-flex align-center justify-content-between">
+              <div class="d-flex justify-content-center align-items-center">
+                <img
+                  class="icon"
+                  src="../assets/balance.svg"
+                  alt="Weigth"
+                  width="48"
+                />
+                <span class="ml-3">{{ pokemon.weight }} Kg</span>
+              </div>
+              <div class="d-flex justify-content-center align-items-center">
+                <img
+                  class="icon"
+                  src="../assets/ruler.svg"
+                  alt="Height"
+                  height="48"
+                />
+                <span class="ml-3">{{ pokemon.height }} m</span>
+              </div>
+            </div>
+          </div>
+          <div class="separator d-flex"></div>
+          <div
+            class="attributes d-flex flex-column align-items-start justify-content-between"
+          >
+            <div class="d-flex justify-content-center">
+              <img src="../assets/heart.svg" alt="HP" width="36" />
+              <span class="ml-3">{{ pokemon.health }} HP</span>
+            </div>
+            <div class="d-flex justify-content-center">
+              <img src="../assets/sword.svg" alt="Attack" width="36" />
+              <span class="ml-3">{{ pokemon.attack }} ATK</span>
+            </div>
+            <div class="d-flex justify-content-center">
+              <img src="../assets/shield.svg" alt="Defense" width="36" />
+              <span class="ml-3">{{ pokemon.defence }} DEF</span>
+            </div>
+            <div class="d-flex justify-content-center">
+              <img src="../assets/speed.svg" alt="Speed" width="36" />
+              <span class="ml-3">{{ pokemon.speed }} SPD</span>
+            </div>
+          </div>
+          <div class="image">
+            <img :src="pokemon.sprite" :alt="pokemon.name" width="200" />
+          </div>
         </div>
       </div>
     </div>
@@ -59,11 +98,88 @@
 </template>
 
 <script>
-export default {};
+export default {
+  data() {
+    return {
+      pokemon_error_name: "",
+      pokemon_name: "",
+      pokemon: {},
+      error: false,
+      loading: false
+    };
+  },
+  methods: {
+    async search() {
+      try {
+        this.loading = true;
+        const res = await fetch(
+          `https://pokeapi.co/api/v2/pokemon/${this.pokemon_name.toLowerCase()}`
+        );
+
+        const body = await res.json();
+
+        this.pokemon = {
+          id: body.id,
+          name: body.name.toUpperCase(),
+          weight: body.weight,
+          height: body.height,
+          health: body.stats[0].base_stat,
+          attack: body.stats[1].base_stat,
+          defence: body.stats[2].base_stat,
+          speed: body.stats[5].base_stat,
+          type: body.types[0].type.name.toUpperCase(),
+          sprite: body.sprites.other["official-artwork"].front_default
+        };
+        this.error = false;
+      } catch (err) {
+        this.pokemon = {};
+        this.error = true;
+        this.pokemon_error_name = this.pokemon_name;
+      } finally {
+        this.pokemon_name = "";
+        this.loading = false;
+      }
+    },
+    clear_all() {
+      this.pokemon_error_name = "";
+      this.pokemon_name = "";
+      this.pokemon = {};
+      this.error = false;
+      this.loading = false;
+    }
+  },
+  computed: {
+    color_accent() {
+      const typeColors = {
+        normal: "#A8A878",
+        fire: "#F08030",
+        water: "#6890F0",
+        grass: "#78C850",
+        electric: "#F4C430",
+        ice: "#98D8D8",
+        fighting: "#C03028",
+        poison: "#A040A0",
+        ground: "#E0C068",
+        flying: "#A890F0",
+        psychic: "#F85888",
+        bug: "#A8B820",
+        rock: "#B8A038",
+        ghost: "#705898",
+        dark: "#705848",
+        dragon: "#7038F8",
+        steel: "#B8B8D0",
+        fairy: "#F0B6BC"
+      };
+      return {
+        "background-color": typeColors[this.pokemon.type?.toLowerCase()]
+      };
+    }
+  }
+};
 </script>
 
 <style>
-@import url("https://fonts.googleapis.com/css2?family=Livvic&family=Red+Rose:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Livvic:wght@700&family=Red+Rose&display=swap");
 
 :root {
   --bg-color: #29292e;
@@ -87,12 +203,14 @@ body {
 .logo img {
   width: 100%;
   max-width: 642px;
+  cursor: pointer;
 }
 
 .search input {
   font-size: 36px;
   color: var(--text-color);
   border-radius: 16px;
+  text-align: center;
 }
 
 .search input::placeholder {
@@ -108,14 +226,14 @@ body {
   font-weight: bold;
   font-size: 36px;
   color: var(--text-color);
-  padding: 10px 75px;
+  padding: 0.3rem 1.5rem;
   border-radius: 16px;
 }
 
 .result {
   width: 100%;
   max-width: 1029px;
-  margin-top: 100px;
+  margin-top: 48px;
 }
 
 .result h2 {
@@ -124,9 +242,12 @@ body {
 }
 
 .card {
-  background-color: #587acc;
   color: var(--white);
   border-radius: 16px;
+}
+
+.name {
+  flex: 0.6;
 }
 
 .name .info h2 {
@@ -136,14 +257,59 @@ body {
   color: var(--white);
 }
 
-.name .info p {
-  background-color: #6890f0;
+.name .info span {
+  background-color: rgba(255, 255, 255, 0.25);
   width: fit-content;
   font-size: 24px;
   border-radius: 32px;
 }
 
-.card .icon {
-  max-width: 36px;
+span {
+  font-size: 1.5rem;
+}
+
+.error_message {
+  display: flex;
+}
+
+.error_message span {
+  font-size: inherit;
+  color: var(--red);
+}
+
+.divider::before {
+  content: "";
+  height: 2px;
+  background-color: var(--text-color);
+  flex: 1;
+}
+.divider::after {
+  content: "";
+  height: 2px;
+  background-color: var(--text-color);
+  flex: 1;
+}
+
+.image {
+  background-color: var(--white);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.loading {
+  min-height: 300px;
+  display: flex;
+}
+
+.loading span {
+  height: 64px;
+  width: 64px;
+}
+
+.separator::before {
+  content: "";
+  width: 3px;
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.25);
 }
 </style>
