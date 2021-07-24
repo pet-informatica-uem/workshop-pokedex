@@ -47,7 +47,9 @@
               <span class="px-3 py-1 mt-3">{{ pokemon.type }}</span>
             </div>
             <div class="measures d-flex align-center justify-content-between">
-              <div class="d-flex justify-content-center align-items-center">
+              <div
+                class="d-flex justify-content-center align-items-center weight"
+              >
                 <img
                   class="icon"
                   src="../assets/balance.svg"
@@ -56,7 +58,9 @@
                 />
                 <span class="ml-3">{{ pokemon.weight }} Kg</span>
               </div>
-              <div class="d-flex justify-content-center align-items-center">
+              <div
+                class="d-flex justify-content-center align-items-center height"
+              >
                 <img
                   class="icon"
                   src="../assets/ruler.svg"
@@ -72,19 +76,34 @@
             class="attributes d-flex flex-column align-items-start justify-content-between"
           >
             <div class="d-flex justify-content-center">
-              <img src="../assets/heart.svg" alt="HP" width="36" />
+              <img src="../assets/heart.svg" alt="HP" width="36" class="icon" />
               <span class="ml-3">{{ pokemon.health }} HP</span>
             </div>
             <div class="d-flex justify-content-center">
-              <img src="../assets/sword.svg" alt="Attack" width="36" />
+              <img
+                src="../assets/sword.svg"
+                alt="Attack"
+                width="36"
+                class="icon"
+              />
               <span class="ml-3">{{ pokemon.attack }} ATK</span>
             </div>
             <div class="d-flex justify-content-center">
-              <img src="../assets/shield.svg" alt="Defense" width="36" />
+              <img
+                src="../assets/shield.svg"
+                alt="Defense"
+                width="36"
+                class="icon"
+              />
               <span class="ml-3">{{ pokemon.defence }} DEF</span>
             </div>
             <div class="d-flex justify-content-center">
-              <img src="../assets/speed.svg" alt="Speed" width="36" />
+              <img
+                src="../assets/speed.svg"
+                alt="Speed"
+                width="36"
+                class="icon"
+              />
               <span class="ml-3">{{ pokemon.speed }} SPD</span>
             </div>
           </div>
@@ -207,7 +226,7 @@ body {
 }
 
 .search input {
-  font-size: 36px;
+  font-size: 2.25rem;
   color: var(--text-color);
   border-radius: 16px;
   text-align: center;
@@ -224,7 +243,7 @@ body {
 
 .search button {
   font-weight: bold;
-  font-size: 36px;
+  font-size: 2.25rem;
   color: var(--text-color);
   padding: 0.3rem 1.5rem;
   border-radius: 16px;
@@ -237,7 +256,7 @@ body {
 }
 
 .result h2 {
-  font-size: 36px;
+  font-size: 2.25rem;
   color: var(--result-text);
 }
 
@@ -252,7 +271,7 @@ body {
 
 .name .info h2 {
   font-family: "Livvic", sans-serif;
-  font-size: 36px;
+  font-size: 2.25rem;
   font-weight: bold;
   color: var(--white);
 }
@@ -260,7 +279,7 @@ body {
 .name .info span {
   background-color: rgba(255, 255, 255, 0.25);
   width: fit-content;
-  font-size: 24px;
+  font-size: 1.5rem;
   border-radius: 32px;
 }
 
@@ -311,5 +330,83 @@ span {
   width: 3px;
   border-radius: 16px;
   background-color: rgba(255, 255, 255, 0.25);
+}
+
+@media (max-width: 991px) {
+  html {
+    font-size: 75%;
+  }
+
+  .card {
+    flex-direction: column !important;
+  }
+
+  .name {
+    flex-direction: row !important;
+  }
+
+  .icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .measures {
+    gap: 2rem;
+  }
+
+  .measures .height {
+    margin-right: 2.5rem;
+  }
+
+  .measures .weight {
+    margin-right: 4.5rem;
+  }
+
+  .attributes {
+    flex-direction: row !important;
+    margin: 2rem 0;
+  }
+
+  .image {
+    text-align: center;
+  }
+}
+
+@media (max-width: 767px) {
+  html {
+    font-size: 62%;
+  }
+
+  .measures .height {
+    margin-right: 2rem;
+  }
+
+  .measures .weight {
+    margin-right: 2.2rem;
+  }
+
+  .attributes {
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+
+  .icon {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    margin-top: 1rem;
+  }
+
+  .name {
+    flex-direction: column !important;
+  }
+
+  .measures {
+    margin-top: 2rem;
+  }
 }
 </style>
